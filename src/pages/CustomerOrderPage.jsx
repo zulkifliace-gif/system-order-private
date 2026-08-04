@@ -1072,8 +1072,43 @@ export default function CustomerOrderPage() {
   // -------------------------------------------------------------
   if (isSessionClosed) {
     const validSessionOrders = sessionOrders.filter(o => o.kitchen_status !== 'CANCELLED');
-    const totalPaid = validSessionOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
     const isVoid = isCancelled || (sessionOrders.length === 0 && currentSession?.status === 'CLOSED');
+
+    // 100% ACCURATE POS CHECKOUT MATCHING MATH ENGINE
+    const subtotal = validSessionOrders.reduce((ordSum, ord) => {
+      const uncancelledItems = getSafeItems(ord.items).filter(i => !i.cancelled);
+      const orderItemsSum = uncancelledItems.reduce((iSum, i) => {
+        const price = Number(i.price) || 0;
+        const qty = Number(i.quantity) || 1;
+        return iSum + (price * qty);
+      }, 0);
+      return ordSum + orderItemsSum;
+    }, 0);
+
+    const takeawayOrders = validSessionOrders.filter(ord => ord.order_type === 'TAKEAWAY');
+    const hasTakeawayOrder = takeawayOrders.length > 0;
+
+    const takeawaySubtotal = takeawayOrders.reduce((ordSum, ord) => {
+      const uncancelledItems = getSafeItems(ord.items).filter(i => !i.cancelled);
+      const orderItemsSum = uncancelledItems.reduce((iSum, i) => {
+        const price = Number(i.price) || 0;
+        const qty = Number(i.quantity) || 1;
+        return iSum + (price * qty);
+      }, 0);
+      return ordSum + orderItemsSum;
+    }, 0);
+
+    const totalItemCount = validSessionOrders.flatMap(ord => getSafeItems(ord.items)).filter(i => !i.cancelled).reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+    const takeawayItemCount = takeawayOrders.flatMap(ord => getSafeItems(ord.items)).filter(i => !i.cancelled).reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+
+    const totals = calculateReceiptTotals(subtotal, receiptSettings, { 
+      isTakeaway: hasTakeawayOrder,
+      itemCount: totalItemCount,
+      takeawayItemCount,
+      takeawaySubtotal
+    });
+
+    const totalPaid = totals.grandTotal;
 
     return (
       <div className={`min-h-screen ${bgPage} flex items-center justify-center p-6 font-sans transition-colors duration-300`}>
