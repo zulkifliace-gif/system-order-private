@@ -1,0 +1,233 @@
+[
+  {
+    "id": "M1",
+    "name": "Nasi Ayam Hainan Steam",
+    "category": "Ayam",
+    "price": 12.9,
+    "description": "Nasi wangi dimasak dengan stok ayam, disaji bersama ayam steam lembut & sos cili halia tradisi.",
+    "image": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
+    "optionGroups": [
+      {
+        "name": "Bahagian Ayam",
+        "required": true,
+        "options": [
+          "Bahagian Paha (Thigh)",
+          "Bahagian Dada (Breast)",
+          "Bahagian Kepak (Wing)"
+        ]
+      },
+      {
+        "name": "Tambahan / Add-ons",
+        "required": false,
+        "options": [
+          "Telur Masak Kicap (+RM1.50)",
+          "Extra Supp & Sos (+RM1.00)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M2",
+    "name": "Nasi Ayam Berempah Rangup",
+    "category": "Ayam",
+    "price": 13.5,
+    "description": "Ayam goreng berempah rempah ratus melayu, kriuk-kriuk rangup disaji bersama kuah kari pekat.",
+    "image": "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80",
+    "optionGroups": [
+      {
+        "name": "Tahap Pedas",
+        "required": true,
+        "options": [
+          "Pedas Biasa",
+          "Extra Pedas Giler 🌶️"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M3",
+    "name": "Nasi Goreng USA & Telur Mata",
+    "category": "Nasi",
+    "price": 14.9,
+    "description": "Nasi goreng tomato dimasak dengan udang, sotong & ayam, ditutup dengan telur mata goyang.",
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80",
+    "optionGroups": [
+      {
+        "name": "Gaya Telur",
+        "required": true,
+        "options": [
+          "Telur Mata Goyang",
+          "Telur Dada",
+          "Telur Masak Penuh"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M5",
+    "name": "Sizzling Chicken Chop Western",
+    "category": "Western",
+    "price": 18.9,
+    "description": "Ayam grill empuk disira sos lada hitam homemade pekat, fries rangup & coleslaw segar.",
+    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80",
+    "optionGroups": [
+      {
+        "name": "Sos Western",
+        "required": true,
+        "options": [
+          "Blackpepper Sauce",
+          "Mushroom Sauce"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M7",
+    "name": "Teh Tarik Kaw / Teh Ais",
+    "category": "Minuman",
+    "price": 3.5,
+    "description": "Teh wangi ditarik buih gebu dengan susu pekat manis seimbang.",
+    "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80",
+    "optionGroups": [
+      {
+        "name": "Suhu & Ais",
+        "required": true,
+        "options": [
+          "Ais (Teh Ais)",
+          "Kurang Ais (Less Ice)",
+          "Panas (Teh Tarik Hot)"
+        ]
+      },
+      {
+        "name": "Kekadangan Manis",
+        "required": true,
+        "options": [
+          "Manis Biasa",
+          "Kurang Manis (Less Sweet)",
+          "Kosong / Tanpa Susu"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M8",
+    "name": "Milo Tabur Dinobong",
+    "category": "Minuman",
+    "price": 4.8,
+    "description": "Milo ais pekat berkrim dengan taburan serbuk Milo padu melimpah di atas.",
+    "image": "https://images.unsplash.com/photo-1541658016709-82535e94bc69?auto=format&fit=crop&w=600&q=80",
+    "optionGroups": [
+      {
+        "name": "Suhu & Ais",
+        "required": true,
+        "options": [
+          "Ais (Cold)",
+          "Kurang Ais (Less Ice)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M9",
+    "name": "Cendol Durian Musang King",
+    "category": "Lain-lain",
+    "price": 11.9,
+    "description": "Cendol hijau kenyal, santan segar, gula melaka asli Melaka bersama ulas durian Musang King.",
+    "image": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80",
+    "optionGroups": []
+  },
+  {
+    "id": "M1785532527760",
+    "name": "Burger kampung",
+    "category": "Western",
+    "price": 9,
+    "description": "",
+    "image": "",
+    "isActive": true,
+    "optionGroups": [
+      {
+        "name": "add on",
+        "required": false,
+        "options": [
+          "timun (+RM0.20)",
+          "chess (+RM0.10)"
+        ]
+      },
+      {
+        "name": "warna roti ",
+        "required": true,
+        "options": [
+          "hitam",
+          "merah"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M1785576760328",
+    "name": "cocola",
+    "category": "Minuman",
+    "price": 3,
+    "description": "",
+    "image": "",
+    "isActive": true,
+    "optionGroups": [
+      {
+        "name": "suhu",
+        "required": true,
+        "options": [
+          "sejuk",
+          "kurangsejuk"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M1785689816112",
+    "name": "kek velvet",
+    "category": "Sampingan",
+    "price": 10,
+    "description": "",
+    "image": "",
+    "isActive": true,
+    "optionGroups": [
+      {
+        "name": "potongan",
+        "required": false,
+        "options": [
+          "2 (+RM10.00)",
+          "3 (+RM20.00)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M1785693002074",
+    "name": "dinobong ais",
+    "category": "promosi",
+    "price": 45,
+    "description": "",
+    "image": "",
+    "isActive": true,
+    "optionGroups": [
+      {
+        "name": "baasah",
+        "required": true,
+        "options": [
+          "takbasah",
+          "nakbasah"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "M1785828975903",
+    "name": "shau2",
+    "category": "ketagih",
+    "price": 4,
+    "description": "",
+    "image": "http://handgun-rug-commute.ngrok-free.dev/uploads/menu-images/menu-1785828954255-4679.jpeg",
+    "isActive": true,
+    "optionGroups": []
+  }
+]
