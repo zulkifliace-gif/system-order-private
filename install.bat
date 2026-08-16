@@ -115,7 +115,12 @@ set DOCKER_PROFILES=
 findstr /i "CLOUDFLARE_TUNNEL_TOKEN=ey" .env >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     set DOCKER_PROFILES=--profile tunnel
-    echo [INFO] Token Cloudflare Named Tunnel dikesan. Mengaktifkan mod HTTPS Online...
+    echo [OK] Token Cloudflare Named Tunnel dikesan. Mengaktifkan mod HTTPS Online...
+) else (
+    echo [INFO] CLOUDFLARE_TUNNEL_TOKEN belum diisi di dalam fail .env.
+    echo        Sistem akan berjalan dalam mod LOKAL SAHAJA (http://localhost:5000).
+    echo        Untuk akses online pelanggan ^& QR Code di luar kedai,
+    echo        sila masukkan token Cloudflare Tunnel di dalam fail .env.
 )
 
 docker compose !DOCKER_PROFILES! up -d
