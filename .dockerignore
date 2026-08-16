@@ -1,0 +1,12 @@
+node_modules/
+.env
+*.log
+scratch/
+.DS_Store
+fb-order-backend/node_modules/
+fb-order-backend/fb_ordering.db
+fb-order-backend/fb_ordering.db-shm
+fb-order-backend/fb_ordering.db-wal
+fb-order-backend/uploads/
+fb-order-backend/data/
+ngrok.exe

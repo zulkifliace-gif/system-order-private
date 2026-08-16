@@ -1,0 +1,35 @@
+services:
+  lajuq:
+    image: lajuq-system:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_STAFF_PIN: 
+    container_name: lajuq-system
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - TELEGRAM_BOT_TOKEN=
+      - TELEGRAM_CHAT_ID=
+      - VAPID_PUBLIC_KEY=
+      - VAPID_PRIVATE_KEY=
+    volumes:
+      # Persistent data — survives container restart/update
+      - lajuq_db:/app/fb-order-backend/data
+      - lajuq_uploads:/app/fb-order-backend/uploads
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  lajuq_db:
+    name: lajuq_db
+  lajuq_uploads:
+    name: lajuq_uploads
