@@ -79,11 +79,22 @@ SAFETY_FILE="pre-restore-safety-$(date +%Y%m%d-%H%M%S).tar.gz"
 
 echo ""
 echo "[*] Langkah 3/4: Membuat salinan keselamatan data semasa (${SAFETY_FILE})..."
-docker run --rm \
+if ! docker run --rm \
   -v lajuq_data:/backup_data \
   -v lajuq_uploads:/backup_uploads \
   -v "$(pwd)":/backup \
-  alpine tar czf "/backup/${SAFETY_FILE}" -C / backup_data backup_uploads >/dev/null 2>&1 || true
+  alpine tar czf "/backup/${SAFETY_FILE}" -C / backup_data backup_uploads >/dev/null 2>&1; then
+
+    echo ""
+    echo "[RALAT KRITIKAL] Gagal mencipta salinan keselamatan (${SAFETY_FILE})!"
+    echo "[BATAL] Pemulihan DIBATALKAN demi keselamatan data anda."
+    echo "        Sila pastikan ruang cakera (disk space) mencukupi."
+    echo ""
+    echo "[*] Menghidupkan semula sistem LajuQ..."
+    docker compose up -d 2>/dev/null || docker start lajuq-system 2>/dev/null || true
+    exit 1
+fi
+echo "[OK] Salinan keselamatan berjaya dicipta (${SAFETY_FILE})."
 
 echo ""
 echo "[*] Langkah 4/4: Memulihkan pangkalan data dan gambar hidangan..."

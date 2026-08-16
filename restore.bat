@@ -92,6 +92,19 @@ echo.
 echo [*] Langkah 3/4: Membuat salinan keselamatan data semasa (!SAFETY_FILE!)...
 docker run --rm -v lajuq_data:/backup_data -v lajuq_uploads:/backup_uploads -v "%cd%:/backup" alpine tar czf "/backup/!SAFETY_FILE!" -C / backup_data backup_uploads >nul 2>&1
 
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [RALAT KRITIKAL] Gagal mencipta salinan keselamatan (!SAFETY_FILE!).
+    echo [BATAL] Pemulihan DIBATALKAN demi keselamatan data anda.
+    echo         Sila pastikan ruang cakera (disk space) mencukupi.
+    echo.
+    echo [*] Menghidupkan semula sistem LajuQ...
+    docker compose up -d >nul 2>&1 || docker start lajuq-system >nul 2>&1
+    pause
+    exit /b 1
+)
+echo [OK] Salinan keselamatan berjaya dicipta (!SAFETY_FILE!).
+
 echo.
 echo [*] Langkah 4/4: Memulihkan pangkalan data dan gambar hidangan...
 docker run --rm -v lajuq_data:/backup_data -v lajuq_uploads:/backup_uploads -v "%cd%:/backup" alpine sh -c "rm -rf /backup_data/* /backup_uploads/* && tar xzf \"/backup/!SELECTED_FILE!\" -C /"
