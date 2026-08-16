@@ -4,8 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        VITE_STAFF_PIN: ${VITE_STAFF_PIN:-1234}
     container_name: lajuq-system
     restart: unless-stopped
     ports:

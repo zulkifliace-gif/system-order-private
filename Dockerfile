@@ -21,10 +21,6 @@ COPY index.html vite.config.js tailwind.config.js postcss.config.js ./
 COPY src/ ./src/
 COPY public/ ./public/
 
-# Pass build-time arguments (Vite requires VITE_ prefix)
-ARG VITE_STAFF_PIN=1234
-ENV VITE_STAFF_PIN=$VITE_STAFF_PIN
-
 # Run production build (outputs to /app/dist)
 RUN npm run build
 

@@ -6,9 +6,8 @@ import { Link } from 'react-router-dom';
 export default function StaffPinGuard({ children, roleTitle = 'Staf Restoran' }) {
   const { receiptSettings } = useOrder();
 
-  // Dynamic PIN from .env or Receipt Settings or Fallback 1234
-  const envPin = import.meta.env.VITE_STAFF_PIN;
-  const targetPin = envPin || receiptSettings?.staffPin || '1234';
+  // Dynamic PIN from SQLite Settings (can be changed in Admin UI) or fallback '1234'
+  const targetPin = receiptSettings?.staffPin || '1234';
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('is_staff_authenticated') === 'true' || 
