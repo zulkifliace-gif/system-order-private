@@ -428,21 +428,7 @@ export default function CounterPage() {
         {/* Status Filter & Summary Bar - Responsive Mobile & Tablet Layout */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col lg:flex-row items-center justify-between gap-4">
           
-          {/* Summary Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none w-full lg:w-auto">
-            <div className="bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 flex items-center gap-2 shrink-0">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-              <span className="text-[11px] sm:text-xs text-slate-400">Kosong: <strong className="text-emerald-400 font-extrabold text-xs sm:text-sm">{countKosong}</strong></span>
-            </div>
-            <div className="bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 flex items-center gap-2 shrink-0">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
-              <span className="text-[11px] sm:text-xs text-slate-400">Ada Pelanggan: <strong className="text-amber-400 font-extrabold text-xs sm:text-sm">{countAdaPelanggan}</strong></span>
-            </div>
-            <div className="bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 flex items-center gap-2 shrink-0">
-              <span className="h-2.5 w-2.5 rounded-full bg-blue-500 animate-pulse"></span>
-              <span className="text-[11px] sm:text-xs text-slate-400">Sedang Makan: <strong className="text-blue-400 font-extrabold text-xs sm:text-sm">{countSedangMakan}</strong></span>
-            </div>
-          </div>
+
 
           {/* Table Search Input Bar */}
           <div className="flex items-center gap-2 bg-slate-950 px-3.5 py-2.5 rounded-2xl border border-slate-800 w-full lg:w-72 shadow-inner">
