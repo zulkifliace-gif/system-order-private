@@ -1830,62 +1830,77 @@ export default function CustomerOrderPage() {
                     Tiada hidangan dijumpai untuk &ldquo;{searchQuery || activeCategory}&rdquo;
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                     {filteredKopitiamItems.map(dish => {
                       const bgBadge = getKopitiamCategoryBg(dish.category);
                       const emoji = getCategoryEmoji(dish);
                       const isOut = isItemOutOfStock(dish);
+                      const isRecommended = recommendedItemIds.has(dish.id) || recommendedItemIds.has(dish.name);
 
                       return (
                         <div
                           key={dish.id}
                           onClick={() => !isOut && handleOpenItemModal(dish)}
-                          className={`bg-[#FAF7EF] rounded-2xl p-3 sm:p-3.5 shadow-sm border border-black/10 flex items-center gap-3 transition transform ${
-                            isOut ? 'opacity-50 grayscale filter cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'
+                          className={`bg-[#FAF7EF] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md border border-black/15 flex flex-col justify-between transition-all duration-300 group ${
+                            isOut ? 'opacity-50 grayscale filter cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'
                           }`}
                         >
-                          <div
-                            className="w-15 h-15 rounded-xl flex items-center justify-center shrink-0 shadow-sm overflow-hidden relative"
-                            style={{ backgroundColor: bgBadge, width: '60px', height: '60px' }}
-                          >
+                          {/* Image Box */}
+                          <div className="relative w-full aspect-[4/3] sm:h-40 overflow-hidden bg-[#E3DBC7] flex items-center justify-center shrink-0 border-b border-black/10">
                             {dish.image && (dish.image.includes('http') || dish.image.includes('data:')) ? (
-                              <img src={dish.image} alt={dish.name} className="w-full h-full object-cover" />
+                              <img src={dish.image} alt={dish.name} className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500" />
                             ) : (
-                              <span className="text-2xl">{emoji}</span>
+                              <span className="text-4xl sm:text-5xl">{emoji}</span>
                             )}
-                          </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <h3 className={`font-zilla font-bold text-base text-[#22262B] leading-tight truncate ${isOut ? 'line-through text-[#6B6F66]' : ''}`}>
-                                {dish.name}
-                              </h3>
-                              {isOut && (
-                                <span className="font-spacemono text-[9px] font-bold text-white bg-rose-600 px-1.5 py-0.2 rounded shadow-xs">
-                                  Stock Habis 🔴
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[12px] text-[#6B6F66] mt-0.5 line-clamp-2 leading-snug">
-                              {dish.description || 'Hidangan segar disediakan segar dari dapur kami.'}
-                            </p>
-
-                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                              <span className="font-spacemono font-bold text-xs text-[#163F35]">
-                                RM {Number(dish.price).toFixed(2)}
-                              </span>
-                              {!isOut && (recommendedItemIds.has(dish.id) || recommendedItemIds.has(dish.name)) && (
-                                <span className="font-spacemono text-[9.5px] font-bold bg-[#F3E3C0] text-[#163F35] px-2 py-0.5 rounded-full border border-[#163F35]/30 flex items-center gap-1 shadow-xs animate-pulse">
+                            {/* Badges */}
+                            <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none">
+                              {!isOut && isRecommended && (
+                                <span className="font-spacemono text-[9px] font-bold bg-[#F3E3C0] text-[#163F35] px-2 py-0.5 rounded-full border border-[#163F35]/30 shadow-md animate-pulse">
                                   ⭐ Recommended
                                 </span>
                               )}
+                              {isOut && (
+                                <span className="font-spacemono text-[9px] font-bold text-white bg-rose-600 px-2 py-0.5 rounded-full shadow-md">
+                                  Habis 🔴
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Price Overlay */}
+                            <div className="absolute bottom-2 left-2 font-spacemono font-bold text-xs sm:text-sm text-[#FAF7EF] bg-[#163F35]/90 px-2.5 py-1 rounded-xl border border-[#FAF7EF]/20 shadow-xs">
+                              RM {Number(dish.price).toFixed(2)}
                             </div>
                           </div>
 
-                          <div className={`w-7.5 h-7.5 rounded-full flex items-center justify-center shrink-0 shadow-sm font-bold ${
-                            isOut ? 'bg-gray-300 text-gray-500' : 'bg-[#D9E5DF] text-[#1F5B4A]'
-                          }`}>
-                            <Plus className="w-4 h-4" />
+                          {/* Card Content */}
+                          <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2">
+                            <div>
+                              <h3 className={`font-zilla font-bold text-sm sm:text-base text-[#22262B] line-clamp-2 leading-tight ${isOut ? 'line-through text-[#6B6F66]' : ''}`}>
+                                {dish.name}
+                              </h3>
+                              <p className="text-[10.5px] sm:text-xs text-[#6B6F66] mt-1 line-clamp-2 leading-snug">
+                                {dish.description || 'Hidangan segar disediakan segar dari dapur kami.'}
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              disabled={isOut}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isOut) handleOpenItemModal(dish);
+                              }}
+                              className={`w-full py-2.5 px-3 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1 transition shadow-sm ${
+                                isOut
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+                                  : 'bg-[#1F5B4A] hover:bg-[#163F35] text-white active:scale-95'
+                              }`}
+                            >
+                              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              <span>{isOut ? 'Habis' : '+ Tambah'}</span>
+                            </button>
                           </div>
                         </div>
                       );
@@ -2670,74 +2685,74 @@ export default function CustomerOrderPage() {
                 </div>
               </div>
             ) : (
-              /* MODE KAD / GRID VIEW */
-              <div className="space-y-4">
+              /* MODE KAD / GRID VIEW (1 LINE 2 PETAK - PREMIUM DESIGN) */
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {filteredMenuItems.map((item) => {
                   const isOut = isItemOutOfStock(item);
+                  const isRecommended = recommendedItemIds.has(item.id) || recommendedItemIds.has(item.name);
                   return (
                     <div 
                       key={item.id}
                       onClick={() => !isOut && handleOpenItemModal(item)}
-                      className={`${bgCard} rounded-3xl p-4 flex gap-4 transition group ${
-                        isOut ? 'opacity-50 grayscale filter cursor-not-allowed border-rose-500/20' : 'cursor-pointer'
+                      className={`${bgCard} rounded-2xl sm:rounded-3xl overflow-hidden shadow-md hover:shadow-xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between transition-all duration-300 group ${
+                        isOut ? 'opacity-50 grayscale filter cursor-not-allowed border-rose-500/20' : 'cursor-pointer hover:-translate-y-1'
                       }`}
                     >
-                      <div className="relative shrink-0">
+                      {/* Top Image Banner */}
+                      <div className="relative w-full aspect-[4/3] sm:h-40 overflow-hidden bg-slate-100 dark:bg-slate-900 shrink-0">
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover bg-slate-200 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 group-hover:scale-105 transition duration-300"
+                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                         />
-                        {isOut && (
-                          <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center p-1 text-center">
-                            <span className="text-[10px] font-black text-white bg-rose-600 px-2 py-0.5 rounded uppercase font-mono">
-                              Stock Habis 🔴
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 opacity-70" />
+                        
+                        {/* Top Badges */}
+                        <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1 flex-wrap pointer-events-none">
+                          {!isOut && isRecommended && (
+                            <span className="text-[9px] sm:text-[10px] font-extrabold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full font-mono shadow-md flex items-center gap-0.5 animate-pulse">
+                              ⭐ Recommended
                             </span>
-                          </div>
-                        )}
+                          )}
+                          {isOut && (
+                            <span className="text-[9px] sm:text-[10px] font-extrabold bg-rose-600 text-white px-2 py-0.5 rounded-full font-mono uppercase shadow-md">
+                              Habis 🔴
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Price Tag Overlay on Image Bottom-Left */}
+                        <div className="absolute bottom-2 left-2 font-mono font-black text-white text-xs sm:text-sm bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-xl border border-white/20 shadow-sm">
+                          RM {Number(item.price).toFixed(2)}
+                        </div>
                       </div>
                       
-                      <div className="flex-1 flex flex-col justify-between">
+                      {/* Card Content & CTA */}
+                      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2">
                         <div>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <h3 className={`font-extrabold text-sm sm:text-base ${isOut ? 'line-through text-slate-400' : textTitle} group-hover:text-rose-500 transition`}>{item.name}</h3>
-                            {isOut && (
-                              <span className="text-[9px] font-extrabold bg-rose-600 text-white px-2 py-0.5 rounded-full font-mono shadow-xs">
-                                Stock Habis 🔴
-                              </span>
-                            )}
-                          </div>
-                          <p className={`text-[11px] ${textMuted} line-clamp-2 mt-1 leading-relaxed`}>{item.description}</p>
+                          <h3 className={`font-extrabold text-xs sm:text-sm ${isOut ? 'line-through text-slate-400' : textTitle} line-clamp-2 leading-snug group-hover:text-rose-500 transition-colors`}>
+                            {item.name}
+                          </h3>
+                          <p className={`text-[10.5px] sm:text-xs ${textMuted} line-clamp-2 mt-1 leading-normal`}>
+                            {item.description || 'Hidangan segar disediakan dari dapur kami.'}
+                          </p>
                         </div>
 
-                        <div className="flex items-center justify-between mt-3 flex-wrap gap-1.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-black text-rose-600 dark:text-rose-400 text-sm sm:text-base">
-                              RM {item.price.toFixed(2)}
-                            </span>
-                            {!isOut && (recommendedItemIds.has(item.id) || recommendedItemIds.has(item.name)) && (
-                              <span className="text-[10px] font-extrabold bg-gradient-to-r from-amber-500/20 to-rose-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-mono flex items-center gap-1 shadow-sm animate-pulse">
-                                ⭐ Recommended
-                              </span>
-                            )}
-                          </div>
-
-                          <button
-                            disabled={isOut}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isOut) handleOpenItemModal(item);
-                            }}
-                            className={`px-3.5 py-2 font-black text-xs rounded-xl shadow-md flex items-center gap-1 transition ${
-                              isOut
-                                ? 'bg-slate-700 text-slate-400 cursor-not-allowed opacity-60'
-                                : 'bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-slate-950 shadow-rose-600/20 active:scale-95'
-                            }`}
-                          >
-                            <Plus className="w-4 h-4" />
-                            <span>{isOut ? 'Habis' : 'Tambah'}</span>
-                          </button>
-                        </div>
+                        <button
+                          disabled={isOut}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isOut) handleOpenItemModal(item);
+                          }}
+                          className={`w-full py-2.5 px-3 font-black text-[11px] sm:text-xs rounded-xl sm:rounded-2xl shadow-md flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 ${
+                            isOut
+                              ? 'bg-slate-700 text-slate-400 cursor-not-allowed opacity-60'
+                              : 'bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-slate-950 shadow-rose-600/20'
+                          }`}
+                        >
+                          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <span>{isOut ? 'Habis Stok' : '+ Tambah'}</span>
+                        </button>
                       </div>
                     </div>
                   );
