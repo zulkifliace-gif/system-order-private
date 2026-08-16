@@ -92,10 +92,17 @@ if [ "$PORT_5000_USED" = true ]; then
 fi
 echo "[OK] Port 5000 sedia digunakan."
 
-# 5. Jalankan Container Docker
+# 5. Jalankan Container Docker (dengan auto-detect Cloudflare Tunnel)
 echo ""
 echo "[*] Langkah 5/5: Memulakan sistem LajuQ..."
-docker compose up -d || docker compose up -d --build
+
+DOCKER_PROFILES=""
+if grep -q "CLOUDFLARE_TUNNEL_TOKEN=ey" .env 2>/dev/null; then
+    DOCKER_PROFILES="--profile tunnel"
+    echo "[INFO] Token Cloudflare Named Tunnel dikesan. Mengaktifkan mod HTTPS Online..."
+fi
+
+docker compose $DOCKER_PROFILES up -d || docker compose $DOCKER_PROFILES up -d --build
 
 echo ""
 echo "[*] Menunggu server bersedia..."

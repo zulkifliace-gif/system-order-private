@@ -106,15 +106,23 @@ if %ERRORLEVEL% EQU 0 (
 echo [OK] Port 5000 sedia digunakan.
 
 :: ------------------------------------------------------------
-:: 5. BINA & JALANKAN CONTAINER DOCKER
+:: 5. BINA & JALANKAN CONTAINER DOCKER (DENGAN AUTO-TUNNEL DETECT)
 :: ------------------------------------------------------------
 echo.
 echo [*] Langkah 5/5: Memulakan sistem LajuQ melalui Docker Compose...
-docker compose up -d
+
+set DOCKER_PROFILES=
+findstr /i "CLOUDFLARE_TUNNEL_TOKEN=ey" .env >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    set DOCKER_PROFILES=--profile tunnel
+    echo [INFO] Token Cloudflare Named Tunnel dikesan. Mengaktifkan mod HTTPS Online...
+)
+
+docker compose !DOCKER_PROFILES! up -d
 
 if %ERRORLEVEL% NEQ 0 (
-    echo [INFO] Mencuba membina imej pertama kali...
-    docker compose up -d --build
+    echo [INFO] Membina imej sistem pertama kali...
+    docker compose !DOCKER_PROFILES! up -d --build
     if %ERRORLEVEL% NEQ 0 (
         echo.
         echo [RALAT] Gagal memulakan container Docker. Sila semak log di atas.

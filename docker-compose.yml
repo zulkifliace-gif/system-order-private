@@ -28,6 +28,21 @@ services:
       retries: 3
       start_period: 20s
 
+  # Cloudflare Named Tunnel (URL Kekal & HTTPS Percuma)
+  # Diaktifkan apabila CLOUDFLARE_TUNNEL_TOKEN diisi di dalam fail .env
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: lajuq-tunnel
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+    command: tunnel --no-autoupdate run
+    depends_on:
+      - lajuq
+    profiles:
+      - tunnel
+      - online
+
 volumes:
   lajuq_data:
     name: lajuq_data
