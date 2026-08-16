@@ -22,12 +22,14 @@ export default function Home() {
       {/* Top Header */}
       <header className="bg-slate-900/80 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center text-2xl shadow-lg shadow-rose-600/30">
-            🍽️
-          </div>
+          <img
+            src="/LajuQ logo.svg"
+            alt="LajuQ Logo"
+            className="h-10 w-auto object-contain drop-shadow-md"
+          />
           <div>
-            <h1 className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-              Rasa Selera F&B Order System
+            <h1 className="font-extrabold text-2xl tracking-tight text-white flex items-center">
+              Laju<span className="text-amber-500">Q</span>
             </h1>
             <p className="text-xs text-slate-400">Portal Staf Dalaman — Akses Terhad</p>
           </div>
@@ -204,7 +206,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
-        Restoran Rasa Selera F&B Order System • Portal Staf (<strong className="text-slate-400">URL: /staff</strong>) • Powered by React & Vite
+        Laju<span className="text-amber-500 font-bold">Q</span> F&B Order System • Portal Staf (<strong className="text-slate-400">URL: /staff</strong>) • Powered by React & Vite
       </footer>
 
     </div>
