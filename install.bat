@@ -8,6 +8,18 @@ echo ============================================================
 echo.
 
 :: ------------------------------------------------------------
+:: 0. PENGESANAN PANTAS (FAST-PATH): JIKA SISTEM SUDAH BERJALAN
+:: ------------------------------------------------------------
+docker ps --filter "name=lajuq-system" --filter "status=running" --format "{{.Names}}" 2>nul | findstr "lajuq-system" >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo [OK] Sistem LajuQ sudah pun aktif dan sedang berjalan!
+    echo [*] Membuka pelayar web terus ke Portal Staf...
+    start http://localhost:5000/staff
+    timeout /t 2 /nobreak >nul
+    exit /b 0
+)
+
+:: ------------------------------------------------------------
 :: 1. SEMAK SAMA ADA DOCKER TERPASANG
 :: ------------------------------------------------------------
 echo [*] Langkah 1/5: Menyemak pemasangan Docker...
@@ -76,8 +88,7 @@ echo.
 echo [*] Langkah 4/5: Menyemak penggunaan Port 5000 di PC anda...
 netstat -ano | findstr ":5000" | findstr "LISTENING" >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    :: Semak sama ada port 5000 digunakan oleh container lajuq sedia ada atau aplikasi lain
-    docker ps --filter "name=lajuq-system" --format "{{.Names}}" | findstr "lajuq-system" >nul 2>&1
+    docker ps --filter "name=lajuq-system" --format "{{.Names}}" 2>nul | findstr "lajuq-system" >nul 2>&1
     if %ERRORLEVEL% NEQ 0 (
         echo.
         echo ============================================================
@@ -99,18 +110,22 @@ echo [OK] Port 5000 sedia digunakan.
 :: ------------------------------------------------------------
 echo.
 echo [*] Langkah 5/5: Memulakan sistem LajuQ melalui Docker Compose...
-docker compose up -d --build
+docker compose up -d
 
 if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo [RALAT] Gagal memulakan container Docker. Sila semak log di atas.
-    pause
-    exit /b 1
+    echo [INFO] Mencuba membina imej pertama kali...
+    docker compose up -d --build
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo [RALAT] Gagal memulakan container Docker. Sila semak log di atas.
+        pause
+        exit /b 1
+    )
 )
 
 echo.
 echo [*] Menunggu server bersedia...
-timeout /t 5 /nobreak >nul
+timeout /t 3 /nobreak >nul
 
 :: ------------------------------------------------------------
 :: BUKA PELAYAR WEB SECARA AUTOMATIK

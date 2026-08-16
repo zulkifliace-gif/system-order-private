@@ -10,6 +10,18 @@ echo "         LAJUQ F&B ORDER SYSTEM - PEMASANGAN SISTEM"
 echo "============================================================"
 echo ""
 
+# 0. Fast-Path: Jika container lajuq-system sudah berjalan
+if docker ps --filter "name=lajuq-system" --filter "status=running" --format "{{.Names}}" 2>/dev/null | grep -q "lajuq-system"; then
+    echo "[OK] Sistem LajuQ sudah pun aktif dan sedang berjalan!"
+    echo "[*] Membuka pelayar web terus ke Portal Staf..."
+    if command -v xdg-open &> /dev/null; then
+        xdg-open "http://localhost:5000/staff" 2>/dev/null || true
+    elif command -v open &> /dev/null; then
+        open "http://localhost:5000/staff" 2>/dev/null || true
+    fi
+    exit 0
+fi
+
 # 1. Semak sama ada Docker terpasang
 echo "[*] Langkah 1/5: Menyemak pemasangan Docker..."
 if ! command -v docker &> /dev/null; then
@@ -68,7 +80,7 @@ elif command -v ss &> /dev/null; then
 fi
 
 if [ "$PORT_5000_USED" = true ]; then
-    if ! docker ps --filter "name=lajuq-system" --format "{{.Names}}" | grep -q "lajuq-system"; then
+    if ! docker ps --filter "name=lajuq-system" --format "{{.Names}}" 2>/dev/null | grep -q "lajuq-system"; then
         echo ""
         echo "============================================================"
         echo "[AMARAN] Port 5000 sedang digunakan oleh aplikasi lain!"
@@ -83,11 +95,11 @@ echo "[OK] Port 5000 sedia digunakan."
 # 5. Jalankan Container Docker
 echo ""
 echo "[*] Langkah 5/5: Memulakan sistem LajuQ..."
-docker compose up -d --build
+docker compose up -d || docker compose up -d --build
 
 echo ""
 echo "[*] Menunggu server bersedia..."
-sleep 5
+sleep 3
 
 echo ""
 echo "============================================================"
@@ -109,7 +121,6 @@ echo "           kerana ia akan memadamkan database anda!"
 echo "============================================================"
 echo ""
 
-# Cuba buka browser secara automatik mengikut OS
 if command -v xdg-open &> /dev/null; then
     xdg-open "http://localhost:5000/staff" 2>/dev/null || true
 elif command -v open &> /dev/null; then
