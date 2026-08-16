@@ -1,8 +1,15 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+const fs = require('fs');
+
+// Ensure data folder exists
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
 // Initialize SQLite Database in WAL mode for maximum performance
-const dbPath = path.join(__dirname, 'fb_ordering.db');
+// Priority: DB_PATH env -> fb_ordering.db (if exists) -> data/fb_ordering.db
+const defaultDbPath = fs.existsSync(path.join(__dirname, 'fb_ordering.db'))
+  ? path.join(__dirname, 'fb_ordering.db')
+  : path.join(dataDir, 'fb_ordering.db');
+const dbPath = process.env.DB_PATH || defaultDbPath;
 const db = new Database(dbPath);
 
 // Enable WAL mode (Write-Ahead Logging) + 5s busy timeout for concurrent writes

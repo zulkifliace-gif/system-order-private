@@ -5,21 +5,23 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_STAFF_PIN: 
+        VITE_STAFF_PIN: ${VITE_STAFF_PIN:-1234}
     container_name: lajuq-system
     restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "${PORT:-5000}:5000"
     environment:
       - NODE_ENV=production
       - PORT=5000
-      - TELEGRAM_BOT_TOKEN=
-      - TELEGRAM_CHAT_ID=
-      - VAPID_PUBLIC_KEY=
-      - VAPID_PRIVATE_KEY=
+      - DB_PATH=/app/fb-order-backend/data/fb_ordering.db
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
     volumes:
-      # Persistent data — survives container restart/update
-      - lajuq_db:/app/fb-order-backend/data
+      # Volume 1: Pangkalan Data SQLite (fb_ordering.db, WAL, SHM) & menu.json
+      - lajuq_data:/app/fb-order-backend/data
+      # Volume 2: Gambar Menu & Banner Uploads (uploads/menu-images, uploads/banners)
       - lajuq_uploads:/app/fb-order-backend/uploads
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/health"]
@@ -29,7 +31,7 @@ services:
       start_period: 20s
 
 volumes:
-  lajuq_db:
-    name: lajuq_db
+  lajuq_data:
+    name: lajuq_data
   lajuq_uploads:
     name: lajuq_uploads
