@@ -2,6 +2,10 @@
 setlocal enabledelayedexpansion
 title LajuQ - Pemulihan Data (Restore)
 
+if exist "C:\Program Files\Docker\Docker\resources\bin" (
+    set "PATH=%PATH%;C:\Program Files\Docker\Docker\resources\bin"
+)
+
 echo ============================================================
 echo         LAJUQ F^&B SYSTEM - PEMULIHAN DATA (RESTORE)
 echo ============================================================
@@ -24,111 +28,135 @@ if %count% EQU 0 (
 
 echo Senarai fail sandaran yang dijumpai:
 echo ------------------------------------------------------------
-for /l %%i in (1,1,%count%) do (
+for /L %%i in (1,1,%count%) do (
     echo   [%%i] !file_%%i!
 )
 echo ------------------------------------------------------------
 echo.
 
-:CHOOSE
-set /p "choice=Pilih nombor fail yang ingin dipulihkan (1-%count%) atau tekan [Q] untuk batal: "
+:CHOOSE_FILE
+set "CHOICE="
+set /p "CHOICE=Pilih nombor fail yang ingin dipulihkan (1-%count%) atau 'Q' untuk batal: "
 
-if /i "%choice%"=="Q" (
+if /i "%CHOICE%"=="Q" (
     echo.
-    echo Pemulihan dibatalkan.
-    echo.
+    echo [*] Proses pemulihan dibatalkan oleh pengguna.
     pause
     exit /b 0
 )
 
-:: Sahkan input nombor sah
-if not defined file_%choice% (
-    echo Pilihan tidak sah. Sila masukkan nombor antara 1 hingga %count%.
-    goto CHOOSE
+:: Sahkan input adalah nombor yang sah
+echo %CHOICE%| findstr /r "^[1-9][0-9]*$" >nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [PILIHAN TIDAK SAH] Sila masukkan nombor antara 1 hingga %count%.
+    goto CHOOSE_FILE
 )
 
-set "SELECTED_FILE=!file_%choice%!"
+if %CHOICE% GTR %count% (
+    echo [PILIHAN TIDAK SAH] Nombor %CHOICE% tiada dalam senarai.
+    goto CHOOSE_FILE
+)
 
+set "SELECTED_FILE=!file_%CHOICE%!"
+echo.
+echo Anda telah memilih: %SELECTED_FILE%
+echo.
+
+:: ------------------------------------------------------------
+:: LAPISAN KESELAMATAN 1: SAHKAN INTEGRITI ARKIB TERLEBIH DAHULU
+:: ------------------------------------------------------------
+echo [*] Langkah 1/5: Menguji integriti fail sandaran...
+docker run --rm -v "%cd%":/backup alpine tar tzf "/backup/%SELECTED_FILE%" >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo ============================================================
+    echo [RALAT KRITIKAL] Fail backup %SELECTED_FILE% rosak/corrupt!
+    echo Restore DIBATALKAN. Data semasa anda TIDAK disentuh.
+    echo Sila gunakan fail backup lain yang tidak rosak.
+    echo ============================================================
+    echo.
+    pause
+    exit /b 1
+)
+echo [OK] Fail backup sah dan tidak rosak.
+
+:: ------------------------------------------------------------
+:: LAPISAN KESELAMATAN 2: PENGESAHAN DUA KALI (DOUBLE CONFIRMATION)
+:: ------------------------------------------------------------
 echo.
 echo ============================================================
-echo [AMARAN] Anda memilih untuk memulihkan:
-echo          !SELECTED_FILE!
-echo.
-echo Sistem akan membuat salinan keselamatan automatik sebelum memulihkan data.
+echo [AMARAN] Tindakan ini akan menggantikan pangkalan data dan
+echo fail gambar semasa dengan kandungan daripada:
+echo   %SELECTED_FILE%
 echo ============================================================
-set /p "confirm=Adakah anda pasti untuk teruskan? (Y/N): "
-
-if /i not "%confirm%"=="Y" (
+set "CONFIRM="
+set /p "CONFIRM=Adakah anda benar-benar pasti untuk teruskan? (Taip 'Y' untuk Ya, 'N' untuk Batal): "
+if /i not "%CONFIRM%"=="Y" (
     echo.
-    echo Pemulihan dibatalkan.
-    echo.
+    echo [*] Pemulihan data dibatalkan oleh pengguna.
     pause
     exit /b 0
 )
 
+:: ------------------------------------------------------------
+:: LAPISAN KESELAMATAN 3: AUTO-BACKUP DATA SEMASA DAHULU
+:: ------------------------------------------------------------
 echo.
-echo [*] Langkah 1/4: Menguji integriti fail sandaran...
-docker run --rm -v "%cd%:/backup" alpine tar tzf "/backup/!SELECTED_FILE!" >nul 2>&1
-
+echo [*] Langkah 2/5: Mencipta salinan keselamatan data semasa (pre-restore safety)...
+set "SAFETY_FILE=pre-restore-safety-backup.tar.gz"
+docker run --rm -v lajuq_data:/backup_data -v lajuq_uploads:/backup_uploads -v "%cd%":/backup alpine tar czf "/backup/%SAFETY_FILE%" -C / backup_data backup_uploads >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo [RALAT KRITIKAL] Fail backup rosak atau tidak lengkap (corrupted)!
-    echo [BATAL] Pemulihan DIBATALKAN. Data semasa anda TIDAK disentuh.
+    echo ============================================================
+    echo [RALAT] Gagal mencipta salinan keselamatan data semasa!
+    echo Restore DIBATALKAN demi keselamatan data anda.
+    echo Sila pastikan ada ruang cakera mencukupi dan Docker aktif.
+    echo ============================================================
     echo.
     pause
     exit /b 1
 )
-echo [OK] Integriti fail sandaran sah dan boleh dibaca.
+echo [OK] Salinan keselamatan dicipta: %SAFETY_FILE%
 
+:: ------------------------------------------------------------
+:: LANGKAH 4: HENTIKAN CONTAINER
+:: ------------------------------------------------------------
 echo.
-echo [*] Langkah 2/4: Memberhentikan sistem seketika...
-docker compose stop lajuq >nul 2>&1 || docker stop lajuq-system >nul 2>&1
+echo [*] Langkah 3/5: Menghentikan servis untuk keselamatan SQLite...
+docker compose down >nul 2>&1
 
-:: Jana nama fail safety backup
-for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set dt=%%I
-set SAFETY_FILE=pre-restore-safety-!dt:~0,8!-!dt:~8,6!.tar.gz
-
+:: ------------------------------------------------------------
+:: LANGKAH 5: PADAM DATA LAMA & EXTRACT DATA BAHARU (DENGAN AUTO-ROLLBACK)
+:: ------------------------------------------------------------
 echo.
-echo [*] Langkah 3/4: Membuat salinan keselamatan data semasa (!SAFETY_FILE!)...
-docker run --rm -v lajuq_data:/backup_data -v lajuq_uploads:/backup_uploads -v "%cd%:/backup" alpine tar czf "/backup/!SAFETY_FILE!" -C / backup_data backup_uploads >nul 2>&1
+echo [*] Langkah 4/5: Memulihkan pangkalan data dan gambar...
+docker run --rm -v lajuq_data:/backup_data -v lajuq_uploads:/backup_uploads -v "%cd%":/backup alpine sh -c "rm -rf /backup_data/* /backup_uploads/* && tar xzf \"/backup/%SELECTED_FILE%\" -C /"
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo [RALAT KRITIKAL] Gagal mencipta salinan keselamatan (!SAFETY_FILE!).
-    echo [BATAL] Pemulihan DIBATALKAN demi keselamatan data anda.
-    echo         Sila pastikan ruang cakera (disk space) mencukupi.
-    echo.
-    echo [*] Menghidupkan semula sistem LajuQ...
-    docker compose up -d >nul 2>&1 || docker start lajuq-system >nul 2>&1
+    echo ============================================================
+    echo [RALAT] Gagal mengekstrak fail backup!
+    echo Melakukan pemulihan kecemasan (Auto-Rollback) ke data asal...
+    docker run --rm -v lajuq_data:/backup_data -v lajuq_uploads:/backup_uploads -v "%cd%":/backup alpine sh -c "rm -rf /backup_data/* /backup_uploads/* && tar xzf \"/backup/%SAFETY_FILE%\" -C /"
+    echo Data asal berjaya dipulihkan. Sila periksa fail backup anda.
+    echo ============================================================
+    docker compose up -d
     pause
     exit /b 1
 )
-echo [OK] Salinan keselamatan berjaya dicipta (!SAFETY_FILE!).
+
+:: ------------------------------------------------------------
+:: LANGKAH 6: MULAKAN SEMULA CONTAINER
+:: ------------------------------------------------------------
+echo.
+echo [*] Langkah 5/5: Memulakan semula sistem LajuQ...
+docker compose up -d
 
 echo.
-echo [*] Langkah 4/4: Memulihkan pangkalan data dan gambar hidangan...
-docker run --rm -v lajuq_data:/backup_data -v lajuq_uploads:/backup_uploads -v "%cd%:/backup" alpine sh -c "rm -rf /backup_data/* /backup_uploads/* && tar xzf \"/backup/!SELECTED_FILE!\" -C /"
-
-if %ERRORLEVEL% EQU 0 (
-    echo.
-    echo [*] Memulakan semula sistem LajuQ...
-    docker compose up -d >nul 2>&1 || docker start lajuq-system >nul 2>&1
-    echo.
-    echo ============================================================
-    echo [BERJAYA] Data sistem telah berjaya dipulihkan sepenuhnya!
-    echo Salinan keselamatan data sebelumnya disimpan sebagai:
-    echo   !SAFETY_FILE!
-    echo.
-    echo Sistem sedia diakses seperti biasa di:
-    echo   http://localhost:5000/staff
-    echo ============================================================
-) else (
-    echo.
-    echo [RALAT] Gagal mengekstrak data. Memulihkan semula data asal dari !SAFETY_FILE!...
-    docker run --rm -v lajuq_data:/backup_data -v lajuq_uploads:/backup_uploads -v "%cd%:/backup" alpine sh -c "tar xzf \"/backup/!SAFETY_FILE!\" -C /"
-    docker compose up -d >nul 2>&1 || docker start lajuq-system >nul 2>&1
-    echo [MAKLUMAN] Data asal telah dipulihkan semula untuk keselamatan.
-)
-
+echo ============================================================
+echo [BERJAYA] Pemulihan data selesai dengan jayanya!
+echo Sistem LajuQ kini beroperasi dengan data daripada:
+echo   %SELECTED_FILE%
+echo ============================================================
 echo.
 pause
