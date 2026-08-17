@@ -1,9 +1,6 @@
 services:
   lajuq:
     image: lajuq-system:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: lajuq-system
     restart: unless-stopped
     ports:

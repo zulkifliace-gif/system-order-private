@@ -22,14 +22,15 @@ if %ERRORLEVEL% EQU 0 (
 :: ------------------------------------------------------------
 :: 1. SEMAK SAMA ADA DOCKER TERPASANG
 :: ------------------------------------------------------------
-echo [*] Langkah 1/5: Menyemak pemasangan Docker...
+echo [*] Langkah 1/6: Menyemak pemasangan Docker...
 where docker >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo ============================================================
     echo [RALAT] Docker Desktop tidak dijumpai di PC/Laptop anda!
     echo.
-    echo Sila muat turun dan pasang Docker Desktop secara percuma dari:
+    echo Sila pasang fail "Docker Desktop Installer.exe" yang disediakan,
+    echo ATAU muat turun secara percuma dari:
     echo ?? https://www.docker.com/products/docker-desktop/
     echo.
     echo Selepas selesai pasang, buka Docker Desktop dan jalankan
@@ -43,7 +44,7 @@ if %ERRORLEVEL% NEQ 0 (
 :: ------------------------------------------------------------
 :: 2. SEMAK SAMA ADA DOCKER DESKTOP SEDANG BERJALAN (RUNNING)
 :: ------------------------------------------------------------
-echo [*] Langkah 2/5: Menyemak status enjin Docker...
+echo [*] Langkah 2/6: Menyemak status enjin Docker...
 docker info >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -51,7 +52,7 @@ if %ERRORLEVEL% NEQ 0 (
     echo [RALAT] Docker Desktop terpasang tetapi BELUM DIBUKA!
     echo.
     echo Sila buka aplikasi "Docker Desktop" pada Windows anda dan
-    echo tunggu sehingga ikon di bawah menunjukkan status "Engine running".
+    echo tunggu sehingga status di bawah menunjukkan "Engine running".
     echo Kemudian, jalankan fail install.bat ini semula.
     echo ============================================================
     echo.
@@ -64,7 +65,7 @@ echo [OK] Docker Desktop sedia digunakan.
 :: 3. PERIKSA & CIPTA FAIL .ENV DARIPADA .ENV.EXAMPLE
 :: ------------------------------------------------------------
 echo.
-echo [*] Langkah 3/5: Menyemak fail konfigurasi (.env)...
+echo [*] Langkah 3/6: Menyemak fail konfigurasi (.env)...
 if not exist ".env" (
     if exist ".env.example" (
         copy ".env.example" ".env" >nul
@@ -85,7 +86,7 @@ if not exist ".env" (
 :: 4. SEMAK KONFLIK PORT 5000
 :: ------------------------------------------------------------
 echo.
-echo [*] Langkah 4/5: Menyemak penggunaan Port 5000 di PC anda...
+echo [*] Langkah 4/6: Menyemak penggunaan Port 5000 di PC anda...
 netstat -ano | findstr ":5000" | findstr "LISTENING" >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     docker ps --filter "name=lajuq-system" --format "{{.Names}}" 2>nul | findstr "lajuq-system" >nul 2>&1
@@ -106,10 +107,42 @@ if %ERRORLEVEL% EQU 0 (
 echo [OK] Port 5000 sedia digunakan.
 
 :: ------------------------------------------------------------
-:: 5. BINA & JALANKAN CONTAINER DOCKER (DENGAN AUTO-TUNNEL DETECT)
+:: 5. IMPORT DOCKER IMAGE PRA-BINA (LAJUQ-SYSTEM.TAR)
 :: ------------------------------------------------------------
 echo.
-echo [*] Langkah 5/5: Memulakan sistem LajuQ melalui Docker Compose...
+echo [*] Langkah 5/6: Menyemak pakej imej sistem LajuQ...
+docker image inspect lajuq-system:latest >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    if exist "lajuq-system.tar" (
+        echo [*] Mengimport imej pra-bina dari lajuq-system.tar ke dalam Docker...
+        docker load -i lajuq-system.tar
+        if %ERRORLEVEL% NEQ 0 (
+            echo [RALAT] Gagal memuatkan imej lajuq-system.tar. Sila pastikan fail tidak rosak.
+            pause
+            exit /b 1
+        )
+        echo [OK] Imej sistem berjaya dimuatkan ke dalam Docker.
+    ) else (
+        if exist "Dockerfile" (
+            echo [*] lajuq-system.tar tidak dijumpai. Membina imej daripada source...
+            docker build -t lajuq-system:latest .
+        ) else (
+            echo.
+            echo [RALAT] Fail pakej "lajuq-system.tar" tidak dijumpai di dalam folder ini!
+            echo Sila pastikan fail lajuq-system.tar diletakkan bersama fail install.bat.
+            pause
+            exit /b 1
+        )
+    )
+) else (
+    echo [OK] Imej lajuq-system sedia wujud di dalam Docker.
+)
+
+:: ------------------------------------------------------------
+:: 6. JALANKAN CONTAINER DOCKER
+:: ------------------------------------------------------------
+echo.
+echo [*] Langkah 6/6: Memulakan sistem LajuQ melalui Docker Compose...
 
 set DOCKER_PROFILES=
 findstr /i "CLOUDFLARE_TUNNEL_TOKEN=ey" .env >nul 2>&1
@@ -126,14 +159,10 @@ if %ERRORLEVEL% EQU 0 (
 docker compose !DOCKER_PROFILES! up -d
 
 if %ERRORLEVEL% NEQ 0 (
-    echo [INFO] Membina imej sistem pertama kali...
-    docker compose !DOCKER_PROFILES! up -d --build
-    if %ERRORLEVEL% NEQ 0 (
-        echo.
-        echo [RALAT] Gagal memulakan container Docker. Sila semak log di atas.
-        pause
-        exit /b 1
-    )
+    echo.
+    echo [RALAT] Gagal memulakan container Docker. Sila semak log di atas.
+    pause
+    exit /b 1
 )
 
 echo.
